@@ -1,0 +1,6 @@
+CREATE TABLE sessionsinfo (
+  id SERIAL PRIMARY KEY,
+  sessionid TEXT NOT NULL UNIQUE,
+  userid INT NOT NULL,
+  expire TIMESTAMP NOT NULL
+)
