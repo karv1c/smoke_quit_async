@@ -16,7 +16,7 @@ pub mod handler;
 
 use crate::handler::*;
 extern crate tera;
-
+//new line
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     pretty_env_logger::init();
