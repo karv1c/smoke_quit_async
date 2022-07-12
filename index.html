@@ -10,24 +10,7 @@
     <div class="container py-5">
         <div class="row">
           <div class="col-sm py-5">
-    <form method="post">
-        <div class="form-group">
-      <label for="user">Enter Username</label>
-      <input id="user" class="form-control" type="text" name="username" placeholder="Username">
-      <label for="pass">and Password</label>
-      <input id="pass" class="form-control" type="password" name="password" placeholder="Password">
-    </div>
-    <div class="form-row">
-        <div class="col-auto">
-          <button formaction="login" type="submit" class="btn btn-outline-secondary" value="login">Log In</button>
-    
-</div>
-<div class="col-auto">
-  <button formaction="register" type="submit" class="btn btn-warning" value="register">Register</button>
-</div>
-   
-    </div>
-    </form>
+    <div id="register_form"></div>
           </div>
           <div class="col-sm-6 text-justify">
             <h1>Finaly!</h1>
@@ -43,8 +26,9 @@
           </div>
         </div>
       </div>
-      <div id="register_form"></div>
+      
       <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
       <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+      <script src="register_form.js"></script>
   </body>
 </html>

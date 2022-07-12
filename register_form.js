@@ -1,21 +1,11 @@
 'use strict';
-fetch('/achievements', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    }, 
-    
-  }).then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    const b = data.lala;
-    const e = React.createElement;
+  const e = React.createElement;
     class Achievements extends React.Component {
         constructor(props) {
             super(props);
             this.state = {valueName: ''};
             this.state = {valuePass: ''};
+            this.state = {valueMessage: ''};
         
             this.handleChangeName = this.handleChangeName.bind(this);
             this.handleChangePass = this.handleChangePass.bind(this);
@@ -31,66 +21,61 @@ fetch('/achievements', {
           }
         
           handleClickReg(event) {
-            //const encodedString = Buffer.from(this.state.valueName + ':'+ this.state.valuePass).toString('base64');
-            //const encoded = btoa(this.state.valueName + ':' + this.state.valuePass);
-            fetch('http://localhost:8080/achievements', {
+            fetch('/register', {
             method: 'POST',
+            body: JSON.stringify({username: this.state.valueName, password: this.state.valuePass}),
             headers: {
               'Content-Type': 'application/json',
             }, 
             
+          }).then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            if (data.message === 'done') {
+              location.href = '/';
+            } else {
+            this.setState({valueMessage: data.message});
+            }
           });
-          //location.href = '/';
-          //alert(this.value.valuePass);
             event.preventDefault();
           }
           handleClickLog(event) {
-            const encoded = btoa(this.state.valueName + ':' + this.state.valuePass);
-            
-            fetch('http://localhost:8080/login', {
-            method: 'POST',
-            withCredentials: true,
-            //body: JSON.stringify({username: this.state.valueName, password: this.state.valuePass}),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Basic '+ encoded,
-              'WWW-Authenticate': 'Basic'
-            }, 
-            
-          })
-          .then(response => response.json())
-          .then(json => console.log(json));
-          event.preventDefault();
+            fetch('/login', {
+              method: 'POST',
+              body: JSON.stringify({username: this.state.valueName, password: this.state.valuePass}),
+              headers: {
+                'Content-Type': 'application/json',
+              }, 
+              
+            }).then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              console.log(data);
+              if (data.message === 'done') {
+                location.href = '/';
+              } else {
+              this.setState({valueMessage: data.message});
+              }
+            });
+              event.preventDefault();
           }
-          /* handleClick() {
-            const response = fetch('http://localhost:8080', {
-            method: 'POST',
-            body: JSON.stringify({
-              name: 'John Smith',
-              job: 'manager',
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-          });
-          } */
         render() {
             
-          return e ("form", {
-            class: "form-group",
-            method: "post",
-          }, e ("label", null, b, e ("input", {
-            class: "form-control",
-            name: "username",
-            type: "text",
-            placeholder: "Username",
-            value: this.state.valueName,
-            onChange: this.handleChangeName
-          })), e ("label", null, "and Password:", e ("input", {
+          return e ("form", {class: "form-group", method: "post"}, 
+            e ("label", null, "Enter Username:",e ("input", {
+              class: "form-control",
+              name: "username",
+              type: "text",
+              placeholder: "Username",
+              value: this.state.valueName,
+              onChange: this.handleChangeName
+            })), e ("label", null, "and Password:", e ("input", {
             class: "form-control",
             name: "password",
-            type: "text",
+            type: "password",
             placeholder: "Password",
             value: this.state.valuePass,
             onChange: this.handleChangePass
@@ -99,26 +84,22 @@ fetch('/achievements', {
           }, e ("div", {
             class: "col-auto"
           }, e ("button", {
-            formaction: "register",
-            type: "submit",
-            class: "btn btn-warning",
-            value: "register",
-            onClick: this.handleClickReg
-          }, "Register")),  e("div", {
-            class: "col-auto"
-          }, e ("button", {
             formaction: "login",
             type: "submit",
             class: "btn btn-outline-secondary",
             value: "login",
             onClick: this.handleClickLog
-          }, "Log In"))));
+          }, "Log In")),  e("div", {
+            class: "col-auto"
+          }, e ("button", {
+            formaction: "register",
+            type: "submit",
+            class: "btn btn-warning",
+            value: "register",
+            onClick: this.handleClickReg
+          }, "Register"))), e ("label", {className: "text-danger"}, this.state.valueMessage));
         }
       }
        const domContainer = document.querySelector('#register_form');
       ReactDOM.render(e(Achievements), domContainer); 
-  });
-
-//var b = 'sx';
-
 

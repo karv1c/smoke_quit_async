@@ -41,7 +41,7 @@ lazy_static! {
 //use self::models::{User, NewUser};
 //use self::schema::users::dsl::{users, attempts, stopped};
 #[derive(Serialize, Deserialize)]
-pub struct ReqRequest {
+pub struct FormRequest {
     pub username: String,
     pub password: String
 }
@@ -171,8 +171,8 @@ pub async fn handler(req: Request<Body>,pool: Pool<ConnectionManager<PgConnectio
         (&Method::POST, "/login") => {
             println!("{:?}",req);
             let b = hyper::body::to_bytes(req).await?;
-
-            let params = form_urlencoded::parse(b.as_ref())
+            let form_request: FormRequest = serde_json::from_slice(b.as_ref()).unwrap();
+            /* let params = form_urlencoded::parse(b.as_ref())
                 .into_owned()
                 .collect::<HashMap<String, String>>();
             println!("{:?}", &params);
@@ -187,80 +187,92 @@ pub async fn handler(req: Request<Body>,pool: Pool<ConnectionManager<PgConnectio
                 n.to_owned()
             } else {
                 "null".to_owned()
-            };
+            }; */
 
             let conn = pool.get().unwrap();
             let mut body = String::new();
             let mut session_id = String::new();
             let result = thread::spawn(move || {
                 
-                match get_user_id_with_namepass(&conn, &name, &password) {
+                match get_user_id_with_namepass(&conn, &form_request.username, &form_request.password) {
                     Ok(user) => {
                         session_id = new_session(&conn, user).unwrap().sessionid;
-                        return Some(session_id)
+                        Some(session_id)
                     },
                     Err(_) => {
                         None
                     },
                 }
             }).join().unwrap();
-            Ok(Response::builder()
-            .status(StatusCode::PERMANENT_REDIRECT)
-            .header("Set-cookie", format!("sessionid={}", result.unwrap()))
-            .header("location", "/")
-            .body(Body::empty())
-            .unwrap())
+            match result {
+                Some(session_id) => {
+                    let body= "{\"message\": \"done\"}";
+                    return Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Set-cookie", format!("sessionid={}", session_id))
+                    .body(body.into())
+                    .unwrap());
+                }
+                None => {
+                    let body= "{\"message\": \"Wrong Username or Password\"}";
+                    return Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .body(body.into())
+                    .unwrap())
+                }
+            }
 
         }
         (&Method::POST, "/register") => {
 
-            println!("{:?}", &req);
             let b = hyper::body::to_bytes(req).await?;
 
-            let params = form_urlencoded::parse(b.as_ref())
-                .into_owned()
-                .collect::<HashMap<String, String>>();
-            println!("{:?}", &params);
-
-            let name = if let Some(n) = params.get("username") {
-                n.to_owned()
-            } else {
-
-                "null".to_owned()
-            };
-            let password = if let Some(n) = params.get("password") {
-                n.to_owned()
-            } else {
-                "null".to_owned()
-            };
+            let form_request: FormRequest = serde_json::from_slice(b.as_ref()).unwrap();
 
             let conn = pool.get().unwrap();
-            let mut body = String::new();
             let mut session_id = String::new();
             let result = thread::spawn(move || {
                 
-                match new_user(&conn, &name, &password) {
+                match new_user(&conn, &form_request.username, &form_request.password) {
                     Ok(user) => {
-                        body = format!("Hello {}, you are in db now", &name);
                         session_id = new_session(&conn, user).unwrap().sessionid;
+                        Some(session_id)
                     },
                     Err(_) => {
-                        body = format!("Name {} is already exist", &name);
+                        None
                     },
-                }
-                
-                (body, session_id)
+                }            
             }).join().unwrap();
-            Ok(Response::builder()
-            .status(StatusCode::PERMANENT_REDIRECT)
-            .header("Set-cookie", format!("sessionid={}", result.1))
-            .header("location", "/")
-            .body(Body::empty())
-            .unwrap())
+            match result {
+                Some(session_id) => {
+                    let body= "{\"message\": \"done\"}";
+                    return Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Set-cookie", format!("sessionid={}", session_id))
+                    .body(body.into())
+                    .unwrap());
+                }
+                None => {
+                    let body= "{\"message\": \"Username is not available\"}";
+                    return Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .body(body.into())
+                    .unwrap())
+                }
+            }
+            
 
         }
         (&Method::GET, "/app.js") => {
             let mut f = File::open("app.js").await.unwrap();
+            let mut source = Vec::new();
+            f.read_to_end(&mut source).await;
+            Ok(Response::builder()
+            .status(StatusCode::OK)
+            .body(source.into())
+            .unwrap())}, 
+        (&Method::GET, "/register_form.js") => {
+            let mut f = File::open("register_form.js").await.unwrap();
             let mut source = Vec::new();
             f.read_to_end(&mut source).await;
             Ok(Response::builder()
