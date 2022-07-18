@@ -1,5 +1,5 @@
 //use diesel::{sql_types::Timestamp, data_types::PgTimestamp};
-use super::schema::{facts, sessionsinfo, users};
+use super::schema::{sessionsinfo, users};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 

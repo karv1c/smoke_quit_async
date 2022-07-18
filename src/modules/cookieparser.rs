@@ -2,8 +2,6 @@ use std::collections::HashMap;
 
 use hyper::header::HeaderValue;
 
-
-
 pub fn parse_cookie(s: Option<&HeaderValue>) -> Option<HashMap<&str, &str>> {
     let cookie = s?;
     let mut map = HashMap::new();

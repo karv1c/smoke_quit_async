@@ -2,20 +2,17 @@ use db::*;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
-#[macro_use]
-extern crate lazy_static;
-use std::convert::Infallible;
-use hyper::Server;
-use hyper::service::{make_service_fn, service_fn};
 use anyhow::Result;
-pub mod schema;
-pub mod models;
+use hyper::service::{make_service_fn, service_fn};
+use hyper::Server;
+use std::convert::Infallible;
 pub mod db;
-pub mod modules;
 pub mod handler;
+pub mod models;
+pub mod modules;
+pub mod schema;
 
 use crate::handler::*;
-extern crate tera;
 //new line
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

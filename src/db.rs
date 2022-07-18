@@ -1,4 +1,4 @@
-use crate::models::{Fact, NewSession, NewUser, Session, User, Achievement};
+use crate::models::{Achievement, Fact, NewSession, NewUser, Session, User};
 use anyhow::Result;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -9,18 +9,17 @@ use rand::distributions::Alphanumeric;
 use rand::Rng;
 use sha2::{Digest, Sha256};
 use std::env;
-use std::thread;
 use std::time::{Duration, SystemTime};
 //use crate::schema::sessionsinfo;
-use crate::schema::facts::dsl::{body, facts, id as fact_db_id, link, title};
-use crate::schema::sessionsinfo::dsl::{sessionid, sessionsinfo, userid};
 use crate::schema::achievements::dsl::achievements;
+use crate::schema::facts::dsl::facts;
+use crate::schema::sessionsinfo::dsl::{sessionid, sessionsinfo, userid};
 use crate::schema::users::dsl::{
     attempts, id as user_db_id, stopped, username as user_db_name, users,
 };
 pub enum ErrorType {
     WrongPassword,
-    NoCookie
+    NoCookie,
 }
 
 pub fn build_pool_connection() -> Pool<ConnectionManager<PgConnection>> {
@@ -152,16 +151,4 @@ pub fn remove_session(
 ) -> Result<(), Error> {
     diesel::delete(sessionsinfo.filter(sessionid.eq(session_id))).execute(conn)?;
     Ok(())
-}
-
-pub fn new_thread<F: 'static + std::marker::Send>(
-    pool: Pool<ConnectionManager<PgConnection>>,
-    f: F,
-) {
-    thread::spawn(move || {
-        let conn = pool.get().unwrap();
-        f;
-    })
-    .join()
-    .unwrap();
 }
